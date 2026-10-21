@@ -1,200 +1,479 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>KATA SCORER</title>
-  <meta name="description" content="KATA SCORER — professional scoring tool for karate kata competition judges. WKF score range 5.0–10.0." />
+  <meta name="description"
+    content="KATA SCORER — professional scoring tool for karate kata competition judges. WKF score range 5.0–10.0." />
   <meta name="theme-color" content="#0B0F14" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     :root {
       /* --- Colour palette --- */
-      --bg:         #0B0F14;
-      --surface:    #141920;
-      --surface-2:  #252B35;
-      --border:     #2E3440;
+      --bg: #0B0F14;
+      --surface: #141920;
+      --surface-2: #252B35;
+      --border: #2E3440;
 
-      --aka:        #FF3B45;
-      --aka-dim:    #991F24;
-      --aka-bg:     #2A1116;
+      --aka: #FF3B45;
+      --aka-dim: #991F24;
+      --aka-bg: #2A1116;
 
-      --ao:         #3985FF;
-      --ao-dim:     #1A4D99;
-      --ao-bg:      #101D33;
+      --ao: #3985FF;
+      --ao-dim: #1A4D99;
+      --ao-bg: #101D33;
 
-      --text:       #FFFFFF;
+      --text: #FFFFFF;
       --text-muted: #B8C0CC;
-      --text-dim:   #4A5260;
+      --text-dim: #4A5260;
 
-      --dq:         #F5A623;
-      --dq-dim:     #8A5C10;
+      --dq: #F5A623;
+      --dq-dim: #8A5C10;
 
-      --btn-h: clamp(48px,7vh,68px);
-      --gap:   clamp(10px,2vw,18px);
+      --btn-h: clamp(48px, 7vh, 68px);
+      --gap: clamp(10px, 2vw, 18px);
       --radius: 10px;
     }
-    html, body { height: 100%; width: 100%; background: var(--bg); color: var(--text);
+
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      overflow: hidden; overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
-    .screen { display: none; position: fixed; inset: 0; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0); }
-    .screen.active { display: flex; }
+      overflow: hidden;
+      overscroll-behavior: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      /* justify-content kept at flex-start so margin:auto on .screen-main centres it */
+      justify-content: flex-start;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Wrapper that centres the core content while the disclaimer
+       stays pinned as the last item in the flex column. */
+    .screen-main {
+      flex: 1 1 0;
+      /* takes all spare vertical space */
+      min-height: 0;
+      /* allow shrinking */
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* centres content within the spare space */
+      gap: var(--gap);
+      padding: clamp(8px, 1.5vh, 20px) clamp(10px, 2vw, 24px) clamp(8px, 1.5vh, 20px);
+    }
+
     /* HOME */
-    #screen-home { gap: var(--gap); }
+    #screen-home {
+      gap: 0;
+      /* gap is now handled inside .screen-main */
+    }
+
     #screen-home h1 {
-      font-size: clamp(1.8rem,7vw,4.5rem); font-weight: 900; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--text);
-      margin-bottom: clamp(12px,3vh,32px);
+      font-size: clamp(1.8rem, 7vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: clamp(12px, 3vh, 32px);
     }
-    .home-btns { display: flex; gap: clamp(14px,3vw,28px); flex-wrap: wrap; justify-content: center; }
-    .btn-home-aka, .btn-home-ao {
-      min-width: clamp(150px,32vw,280px); height: clamp(64px,13vh,110px);
-      font-size: clamp(1.4rem,5vw,2.6rem); font-weight: 900; letter-spacing: .12em;
-      border: none; border-radius: var(--radius); cursor: pointer; text-transform: uppercase; outline: none;
+
+    .home-btns {
+      display: flex;
+      gap: clamp(14px, 3vw, 28px);
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .btn-home-aka { background: var(--aka); color: #fff; }
-    .btn-home-aka:active { background: var(--aka-dim); }
-    .btn-home-ao  { background: var(--ao);  color: #fff; }
-    .btn-home-ao:active  { background: var(--ao-dim);  }
+
+    .btn-home-aka,
+    .btn-home-ao {
+      min-width: clamp(150px, 32vw, 280px);
+      height: clamp(64px, 13vh, 110px);
+      font-size: clamp(1.4rem, 5vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: .12em;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-transform: uppercase;
+      outline: none;
+    }
+
+    .btn-home-aka {
+      background: var(--aka);
+      color: #fff;
+    }
+
+    .btn-home-aka:active {
+      background: var(--aka-dim);
+    }
+
+    .btn-home-ao {
+      background: var(--ao);
+      color: #fff;
+    }
+
+    .btn-home-ao:active {
+      background: var(--ao-dim);
+    }
+
     /* GENERIC BUTTONS */
     .btn {
-      border: none; border-radius: var(--radius); cursor: pointer; font-weight: 700;
-      font-size: clamp(.85rem,2vw,1.05rem); letter-spacing: .05em; text-transform: uppercase;
-      height: var(--btn-h); padding: 0 clamp(14px,2.5vw,28px); outline: none; white-space: nowrap;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: clamp(.85rem, 2vw, 1.05rem);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      height: var(--btn-h);
+      padding: 0 clamp(14px, 2.5vw, 28px);
+      outline: none;
+      white-space: nowrap;
     }
-    .btn-primary-aka { background: var(--aka); color: #fff; }
-    .btn-primary-aka:active { background: var(--aka-dim); }
-    .btn-primary-ao  { background: var(--ao);  color: #fff; }
-    .btn-primary-ao:active  { background: var(--ao-dim);  }
+
+    .btn-primary-aka {
+      background: var(--aka);
+      color: #fff;
+    }
+
+    .btn-primary-aka:active {
+      background: var(--aka-dim);
+    }
+
+    .btn-primary-ao {
+      background: var(--ao);
+      color: #fff;
+    }
+
+    .btn-primary-ao:active {
+      background: var(--ao-dim);
+    }
+
     .btn-secondary {
-      background: var(--surface-2); color: var(--text);
+      background: var(--surface-2);
+      color: var(--text);
       border: 1px solid var(--border);
     }
-    .btn-secondary:active { background: var(--border); }
+
+    .btn-secondary:active {
+      background: var(--border);
+    }
+
     .btn-dq {
-      background: transparent; color: var(--dq);
-      border: 2px solid var(--dq); font-size: clamp(.78rem,1.8vw,.98rem);
+      background: transparent;
+      color: var(--dq);
+      border: 2px solid var(--dq);
+      font-size: clamp(.78rem, 1.8vw, .98rem);
     }
-    .btn-dq:active { background: var(--dq-dim); color: #fff; border-color: var(--dq-dim); }
+
+    .btn-dq:active {
+      background: var(--dq-dim);
+      color: #fff;
+      border-color: var(--dq-dim);
+    }
+
     .btn-nav {
-      background: var(--surface-2); color: var(--text-muted);
-      border: 1px solid var(--border); font-size: clamp(.78rem,1.8vw,.98rem);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-size: clamp(.78rem, 1.8vw, .98rem);
     }
-    .btn-nav:active { background: var(--border); }
+
+    .btn-nav:active {
+      background: var(--border);
+    }
+
     .btn-fs {
-      background: transparent; color: var(--text-dim);
-      border: 1px solid var(--border); font-size: clamp(.72rem,1.5vw,.88rem);
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      font-size: clamp(.72rem, 1.5vw, .88rem);
     }
-    .btn-fs:active { background: var(--border); }
+
+    .btn-fs:active {
+      background: var(--border);
+    }
+
+    /* Small fullscreen button placed at top-right of home and select screens */
+    .fs-corner {
+      position: absolute;
+      top: max(8px, env(safe-area-inset-top, 8px));
+      right: max(10px, env(safe-area-inset-right, 10px));
+      z-index: 20;
+    }
+
     /* SELECT SCREEN */
     #screen-select {
+      /* No additional padding beyond safe-area: .screen-main handles centering */
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+      gap: 0;
+    }
+
+    .sel-header {
+      display: flex;
+      align-items: center;
       gap: var(--gap);
-      padding: clamp(10px,2vh,24px) clamp(10px,2vw,24px) calc(clamp(26px, 5vh, 40px) + env(safe-area-inset-bottom, 0px));
+      width: 100%;
+      max-width: 640px;
     }
-    .sel-header { display: flex; align-items: center; gap: var(--gap); width: 100%; max-width: 640px; }
+
     .sel-title {
-      font-size: clamp(1.4rem,5vw,2.4rem); font-weight: 900;
-      letter-spacing: .1em; text-transform: uppercase;
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
     }
-    .sel-title.aka { color: var(--aka); }
-    .sel-title.ao  { color: var(--ao); }
-    .picker-wrap { display: flex; align-items: center; gap: clamp(12px,2.5vw,24px); }
+
+    .sel-title.aka {
+      color: var(--aka);
+    }
+
+    .sel-title.ao {
+      color: var(--ao);
+    }
+
+    .picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: clamp(12px, 2.5vw, 24px);
+    }
+
     .btn-adj {
-      width: clamp(52px,10vw,68px); height: clamp(52px,10vw,68px); border-radius: 50%;
-      border: 2px solid var(--border); background: var(--surface-2); color: var(--text);
-      font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width: clamp(52px, 10vw, 68px);
+      height: clamp(52px, 10vw, 68px);
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .btn-adj:active { background: var(--border); }
+
+    .btn-adj:active {
+      background: var(--border);
+    }
+
     .scroll-container {
-      width: clamp(120px,26vw,190px); height: clamp(150px,30vh,210px);
-      overflow-y: auto; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
-      border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
-      position: relative; scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+      width: clamp(120px, 26vw, 190px);
+      height: clamp(150px, 30vh, 210px);
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
     }
-    .scroll-container::-webkit-scrollbar { width: 4px; }
-    .scroll-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .scroll-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
     /* Unselected rows: visible but clearly secondary */
     .score-item {
-      scroll-snap-align: center; height: clamp(44px,9vh,58px);
-      display: flex; align-items: center; justify-content: center;
+      scroll-snap-align: center;
+      height: clamp(44px, 9vh, 58px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-family: 'Courier New', Courier, monospace;
-      font-size: clamp(1.05rem,3.2vw,1.5rem);
-      font-weight: 600; color: var(--text-muted); cursor: pointer; letter-spacing: .05em;
+      font-size: clamp(1.05rem, 3.2vw, 1.5rem);
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      letter-spacing: .05em;
     }
+
     /* Selected row: full white, larger, with colour accent */
     .score-item.selected {
-      color: var(--text); font-size: clamp(1.5rem,5vw,2.2rem); font-weight: 800;
+      color: var(--text);
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-weight: 800;
     }
-    .score-item.selected.aka { color: var(--aka); }
-    .score-item.selected.ao  { color: var(--ao); }
+
+    .score-item.selected.aka {
+      color: var(--aka);
+    }
+
+    .score-item.selected.ao {
+      color: var(--ao);
+    }
+
     /* Centre highlight band */
     .scroll-highlight {
-      position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-      height: clamp(44px,9vh,58px); background: rgba(255,255,255,.05);
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      pointer-events: none; border-radius: 4px;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: clamp(44px, 9vh, 58px);
+      background: rgba(255, 255, 255, .05);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      pointer-events: none;
+      border-radius: 4px;
     }
+
     /* Large score preview beside the picker */
     .current-score-display {
       font-family: 'Courier New', Courier, monospace;
-      font-size: clamp(3rem,10vw,6rem); font-weight: 900; letter-spacing: .04em;
-      min-width: 4.5ch; text-align: center;
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 900;
+      letter-spacing: .04em;
+      min-width: 4.5ch;
+      text-align: center;
     }
-    .current-score-display.aka { color: var(--aka); }
-    .current-score-display.ao  { color: var(--ao); }
-    .sel-actions { display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center; width: 100%; max-width: 640px; }
-    .btn-show { flex: 1 1 auto; min-width: 140px; font-size: clamp(.9rem,2.5vw,1.15rem); }
-    .sel-nav { display: flex; gap: var(--gap); flex-wrap: wrap; justify-content: center; width: 100%; max-width: 640px; }
+
+    .current-score-display.aka {
+      color: var(--aka);
+    }
+
+    .current-score-display.ao {
+      color: var(--ao);
+    }
+
+    .sel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap);
+      justify-content: center;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .btn-show {
+      flex: 1 1 auto;
+      min-width: 140px;
+      font-size: clamp(.9rem, 2.5vw, 1.15rem);
+    }
+
+    .sel-nav {
+      display: flex;
+      gap: var(--gap);
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 640px;
+    }
+
     /* DISPLAY SCREEN ---------------------------------------- */
     /* 4-row named grid: label | score | actions | nav
        Score row gets 1fr so it fills the remaining height,
        pushing the score to ~40% of vh in landscape.           */
     #screen-display {
       display: none;
-      grid-template-rows: auto auto 1fr auto auto;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr auto auto auto;
       grid-template-areas:
         "label"
         "dq"
         "score"
         "actions"
-        "nav";
+        "nav"
+        "disclaimer";
       width: 100%;
       height: 100%;
-      padding: clamp(8px,1.5vh,20px) clamp(10px,2vw,24px) calc(clamp(26px, 5vh, 40px) + env(safe-area-inset-bottom, 0px));
-      row-gap: clamp(4px,1vh,12px);
+      /* Remove the extra bottom padding that was compensating for the old
+         fixed disclaimer — the disclaimer now lives in its own grid row. */
+      padding: clamp(8px, 1.5vh, 20px) clamp(10px, 2vw, 24px) max(4px, env(safe-area-inset-bottom, 4px));
+      row-gap: clamp(4px, 1vh, 12px);
       align-items: center;
       justify-items: center;
+      justify-content: center;
       /* Subtle tinted bg applied by JS */
     }
+
     #screen-display.active {
       display: grid;
     }
-    #screen-display.tint-aka { background: var(--aka-bg); }
-    #screen-display.tint-ao  { background: var(--ao-bg);  }
-    #screen-display.tint-dq  { background: #1C1400;       }
+
+    #screen-display.tint-aka {
+      background: var(--aka-bg);
+    }
+
+    #screen-display.tint-ao {
+      background: var(--ao-bg);
+    }
+
+    #screen-display.tint-dq {
+      background: #1C1400;
+    }
 
     /* Competitor label — second most prominent */
     .disp-label {
       grid-area: label;
-      font-size: clamp(2rem,6vw,3.2rem); font-weight: 900;
-      letter-spacing: .14em; text-transform: uppercase;
-      align-self: end; /* sit at the bottom of the label cell */
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      align-self: end;
+      /* sit at the bottom of the label cell */
       text-align: center;
     }
-    .disp-label.aka { color: var(--aka); }
-    .disp-label.ao  { color: var(--ao);  }
-    .disp-label.dq  { color: var(--dq);  }
+
+    .disp-label.aka {
+      color: var(--aka);
+    }
+
+    .disp-label.ao {
+      color: var(--ao);
+    }
+
+    .disp-label.dq {
+      color: var(--dq);
+    }
 
     /* DISQUALIFIED sub-label shares the label cell visually */
     .disp-dq-text {
       grid-area: dq;
       align-self: center;
       margin-top: 2px;
-      font-size: clamp(1rem,3.5vw,2rem); font-weight: 800;
-      color: var(--dq); letter-spacing: .1em; text-transform: uppercase; display: none;
+      font-size: clamp(1rem, 3.5vw, 2rem);
+      font-weight: 800;
+      color: var(--dq);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      display: none;
     }
 
     /* THE SCORE — dominant element */
@@ -204,40 +483,76 @@
       /* Target ~35-45% of available height in landscape.
          min() picks whichever is smaller so it never overflows. */
       font-size: min(40vh, 28vw, 20rem);
-      font-weight: 900; line-height: 1; letter-spacing: .02em;
-      color: var(--text); /* Always bright white */
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .02em;
+      color: var(--text);
+      /* Always bright white */
       align-self: center;
     }
-    .disp-score.dq { color: var(--dq); }
+
+    .disp-score.dq {
+      color: var(--dq);
+    }
 
     /* Action row (CHANGE SCORE + FULL SCREEN) */
     .disp-actions {
       grid-area: actions;
-      display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap);
+      justify-content: center;
       width: 100%;
     }
+
     /* Navigation row (BACK TO AKA / NEXT: AO / NEXT ROUND) */
     .disp-nav {
       grid-area: nav;
-      display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap);
+      justify-content: center;
       width: 100%;
     }
+
     /* DIALOG */
     #dialog-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88);
-      align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .88);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
     }
-    #dialog-overlay.active { display: flex; }
+
+    #dialog-overlay.active {
+      display: flex;
+    }
+
     .dialog-box {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      padding: clamp(20px,4vw,36px); max-width: 420px; width: 100%;
-      display: flex; flex-direction: column; gap: 18px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.8);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: clamp(20px, 4vw, 36px);
+      max-width: 420px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .8);
     }
+
     .dialog-title {
-      font-size: clamp(1rem,3vw,1.3rem); font-weight: 700; text-align: center;
-      line-height: 1.5; white-space: pre-line; color: var(--text);
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.5;
+      white-space: pre-line;
+      color: var(--text);
     }
+
     .dialog-btns {
       display: flex;
       flex-direction: row;
@@ -245,6 +560,7 @@
       gap: var(--gap);
       justify-content: center;
     }
+
     .dialog-btns .btn {
       /* Override the base .btn fixed-height so labels can wrap */
       box-sizing: border-box;
@@ -258,95 +574,155 @@
       line-height: 1.3;
       text-align: center;
     }
+
     /* Stack vertically on very narrow viewports */
     @media (max-width: 360px) {
-      .dialog-btns { flex-direction: column; }
-      .dialog-btns .btn { flex: none; width: 100%; }
+      .dialog-btns {
+        flex-direction: column;
+      }
+
+      .dialog-btns .btn {
+        flex: none;
+        width: 100%;
+      }
     }
-    /* DISCLAIMER */
+
+    /* DISCLAIMER — last flex child inside each screen, below .screen-main.
+       .screen-main takes all spare space so the disclaimer is pinned to the
+       bottom without disturbing the centred composition above. */
     .disclaimer {
-      position: fixed;
-      bottom: max(4px, env(safe-area-inset-bottom, 4px));
-      left: 0;
-      right: 0;
+      width: 100%;
       text-align: center;
-      font-size: clamp(.55rem,1.2vw,.7rem);
+      font-size: clamp(.55rem, 1.2vw, .7rem);
       line-height: 1.2;
       color: var(--text-dim);
       pointer-events: none;
-      z-index: 10;
-      padding: 0 8px;
+      padding: 2px 8px max(4px, env(safe-area-inset-bottom, 4px));
+      flex-shrink: 0;
+      /* never collapse, takes minimal height */
     }
+
+    /* On the display screen the disclaimer is a grid child — give it a named area. */
+    #screen-display .disclaimer {
+      grid-area: disclaimer;
+      align-self: end;
+      padding-bottom: max(4px, env(safe-area-inset-bottom, 4px));
+    }
+
     /* RESPONSIVE — short landscape phones (e.g. landscape iPhone SE ~375×667)
        At max-height 500px the score should fill height, not width.         */
     @media (orientation: landscape) and (max-height: 500px) {
-      /* Select screen: horizontal flow to save vertical space */
+
+      /* Select screen: horizontal flow to save vertical space.
+         The horizontal reflow is applied to .screen-main, which contains
+         all the select-screen controls, not to the outer screen div. */
       #screen-select {
-        flex-direction: row; flex-wrap: wrap; align-items: center;
-        padding: 6px 8px calc(24px + env(safe-area-inset-bottom, 0px));
+        padding: 6px 8px max(2px, env(safe-area-inset-bottom, 2px));
+      }
+
+      #screen-select .screen-main {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
         gap: 8px;
       }
-      .sel-header { max-width: none; flex: 1 1 100%; }
-      .picker-wrap { flex: 1 1 auto; }
-      .sel-actions { flex: 1 1 auto; }
-      .sel-nav { flex: 1 1 100%; }
+
+      .sel-header {
+        max-width: none;
+        flex: 1 1 100%;
+      }
+
+      .picker-wrap {
+        flex: 1 1 auto;
+      }
+
+      .sel-actions {
+        flex: 1 1 auto;
+      }
+
+      .sel-nav {
+        flex: 1 1 100%;
+      }
 
       /* Display screen: tighten rows and scale score to height */
       #screen-display {
-        padding: 5px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+        padding: 5px 12px max(2px, env(safe-area-inset-bottom, 2px));
         row-gap: 3px;
       }
+
       .disp-score {
         /* In short landscape: height is the constraint, cap at 38vh */
         font-size: min(38vh, 26vw, 16rem);
       }
-      .disp-label { font-size: clamp(2rem, 7.5vh, 2.5rem); }
-      .disp-dq-text { font-size: clamp(.85rem, 2.5vh, 1.4rem); }
+
+      .disp-label {
+        font-size: clamp(2rem, 7.5vh, 2.5rem);
+      }
+
+      .disp-dq-text {
+        font-size: clamp(.85rem, 2.5vh, 1.4rem);
+      }
     }
+
     /* Very small portrait screens (width < 360px) */
     @media (max-width: 360px) and (orientation: portrait) {
-      .disp-score { font-size: min(35vh, 28vw, 9rem); }
-      .disp-label { font-size: clamp(1.8rem, 7vw, 2.2rem); }
+      .disp-score {
+        font-size: min(35vh, 28vw, 9rem);
+      }
+
+      .disp-label {
+        font-size: clamp(1.8rem, 7vw, 2.2rem);
+      }
     }
 
     /* ---- PORTRAIT MODE layout class ---- */
     /* Applied to <body> when judge accepts portrait layout */
-    body.portrait-mode #screen-home {
+    body.portrait-mode #screen-home .screen-main {
       gap: clamp(16px, 4vh, 32px);
     }
+
     body.portrait-mode .home-btns {
       flex-direction: column;
       align-items: center;
     }
+
     body.portrait-mode .btn-home-aka,
     body.portrait-mode .btn-home-ao {
       width: clamp(200px, 72vw, 340px);
     }
-    body.portrait-mode #screen-select {
+
+    body.portrait-mode #screen-select .screen-main {
       gap: clamp(8px, 1.5vh, 14px);
     }
+
     body.portrait-mode .sel-actions {
       flex-direction: column;
       align-items: center;
     }
+
     body.portrait-mode .sel-actions .btn {
       width: clamp(200px, 72vw, 360px);
     }
+
     body.portrait-mode #screen-display {
       row-gap: clamp(6px, 1.5vh, 14px);
     }
+
     body.portrait-mode .disp-score {
       /* In portrait, width is the constraint — use vw-based size */
       font-size: min(30vh, 26vw, 12rem);
     }
+
     body.portrait-mode .disp-label {
       font-size: clamp(2rem, 7vw, 2.8rem);
     }
+
     body.portrait-mode .disp-actions,
     body.portrait-mode .disp-nav {
       flex-direction: column;
       align-items: center;
     }
+
     body.portrait-mode .disp-actions .btn,
     body.portrait-mode .disp-nav .btn {
       width: clamp(200px, 72vw, 360px);
@@ -366,17 +742,22 @@
       z-index: 800;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
       max-width: calc(100vw - 32px);
       white-space: nowrap;
     }
-    #orient-toast.visible { display: flex; }
+
+    #orient-toast.visible {
+      display: flex;
+    }
+
     #orient-toast-msg {
       font-size: clamp(0.7rem, 2vw, 0.88rem);
       color: var(--text-muted);
       font-weight: 600;
       letter-spacing: 0.03em;
     }
+
     #orient-toast-accept {
       border: none;
       border-radius: 8px;
@@ -391,7 +772,11 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    #orient-toast-accept:active { background: var(--border); }
+
+    #orient-toast-accept:active {
+      background: var(--border);
+    }
+
     #orient-toast-dismiss {
       background: none;
       border: none;
@@ -401,487 +786,520 @@
       padding: 4px 2px;
       line-height: 1;
     }
-    #orient-toast-dismiss:active { color: var(--text-muted); }
+
+    #orient-toast-dismiss:active {
+      color: var(--text-muted);
+    }
   </style>
 </head>
+
 <body>
 
-<!-- HOME -->
-<div id="screen-home" class="screen active">
-  <h1>KATA SCORER</h1>
-  <div class="home-btns">
-    <button id="btn-home-aka" class="btn-home-aka" aria-label="Score AKA competitor">AKA</button>
-    <button id="btn-home-ao"  class="btn-home-ao"  aria-label="Score AO competitor">AO</button>
-  </div>
-</div>
-
-<!-- SELECT -->
-<div id="screen-select" class="screen" role="main" aria-label="Score selection">
-  <div class="sel-header">
-    <span id="sel-title" class="sel-title" aria-live="polite"></span>
-  </div>
-  <div class="picker-wrap">
-    <button id="btn-minus" class="btn-adj" aria-label="Decrease score by 0.1">&#8722;</button>
-    <div style="position:relative">
-      <div id="score-scroll" class="scroll-container" role="listbox" aria-label="Score selector" aria-orientation="vertical"></div>
-      <div class="scroll-highlight" aria-hidden="true"></div>
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <button id="btn-fullscreen-home" class="btn btn-fs fs-corner" aria-label="Toggle full screen">&#9974; FULL
+      SCREEN</button>
+    <div class="screen-main">
+      <h1>KATA SCORER</h1>
+      <div class="home-btns">
+        <button id="btn-home-aka" class="btn-home-aka" aria-label="Score AKA competitor">AKA</button>
+        <button id="btn-home-ao" class="btn-home-ao" aria-label="Score AO competitor">AO</button>
+      </div>
     </div>
-    <button id="btn-plus" class="btn-adj" aria-label="Increase score by 0.1">+</button>
+    <p class="disclaimer">Not officially endorsed by the World Karate Federation (WKF).</p>
   </div>
-  <div id="current-score-display" class="current-score-display" aria-live="polite" aria-label="Selected score"></div>
-  <div class="sel-actions">
-    <button id="btn-show" class="btn btn-show" aria-label="Display selected score">SHOW SCORE</button>
-    <button id="btn-dq"   class="btn btn-dq"   aria-label="Disqualify competitor">DISQUALIFIED (0.0)</button>
-  </div>
-  <div class="sel-nav">
-    <button id="btn-sel-back" class="btn btn-nav" style="display:none" aria-label="Back to AKA">&#8592; BACK TO AKA</button>
-    <button id="btn-sel-next" class="btn btn-nav" style="display:none" aria-label="Next competitor AO">NEXT: AO &#8594;</button>
-  </div>
-</div>
 
-<!-- DISPLAY -->
-<div id="screen-display" class="screen" role="main" aria-label="Score display">
-  <div id="disp-label"   class="disp-label"   aria-live="polite"></div>
-  <div id="disp-dq-text" class="disp-dq-text" aria-live="assertive">DISQUALIFIED</div>
-  <div id="disp-score"   class="disp-score"   aria-live="polite" aria-label="Displayed score"></div>
-  <div class="disp-actions">
-    <button id="btn-change"     class="btn btn-secondary" aria-label="Change displayed score">CHANGE SCORE</button>
-    <button id="btn-fullscreen" class="btn btn-fs"        aria-label="Toggle full screen">&#9974; FULL SCREEN</button>
+  <!-- SELECT -->
+  <div id="screen-select" class="screen" role="main" aria-label="Score selection">
+    <button id="btn-fullscreen-select" class="btn btn-fs fs-corner" aria-label="Toggle full screen">&#9974; FULL
+      SCREEN</button>
+    <div class="screen-main">
+      <div class="sel-header">
+        <span id="sel-title" class="sel-title" aria-live="polite"></span>
+      </div>
+      <div class="picker-wrap">
+        <button id="btn-minus" class="btn-adj" aria-label="Decrease score by 0.1">&#8722;</button>
+        <div style="position:relative">
+          <div id="score-scroll" class="scroll-container" role="listbox" aria-label="Score selector"
+            aria-orientation="vertical"></div>
+          <div class="scroll-highlight" aria-hidden="true"></div>
+        </div>
+        <button id="btn-plus" class="btn-adj" aria-label="Increase score by 0.1">+</button>
+      </div>
+      <div id="current-score-display" class="current-score-display" aria-live="polite" aria-label="Selected score">
+      </div>
+      <div class="sel-actions">
+        <button id="btn-show" class="btn btn-show" aria-label="Display selected score">SHOW SCORE</button>
+        <button id="btn-dq" class="btn btn-dq" aria-label="Disqualify competitor">DISQUALIFIED (0.0)</button>
+      </div>
+      <div class="sel-nav">
+        <button id="btn-sel-back" class="btn btn-nav" style="display:none" aria-label="Back to AKA">&#8592; BACK TO
+          AKA</button>
+        <button id="btn-sel-next" class="btn btn-nav" style="display:none" aria-label="Next competitor AO">NEXT: AO
+          &#8594;</button>
+      </div>
+    </div>
+    <p class="disclaimer">Not officially endorsed by the World Karate Federation (WKF).</p>
   </div>
-  <div class="disp-nav">
-    <button id="btn-disp-back"       class="btn btn-nav" style="display:none" aria-label="Back to AKA">&#8592; BACK TO AKA</button>
-    <button id="btn-disp-next-ao"    class="btn btn-nav" style="display:none" aria-label="Next: score AO">NEXT: AO &#8594;</button>
-    <button id="btn-disp-next-round" class="btn btn-nav" style="display:none" aria-label="Next round">NEXT ROUND &#8635;</button>
-  </div>
-</div>
 
-<!-- DIALOG -->
-<div id="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title-text">
-  <div class="dialog-box">
-    <p id="dialog-title-text" class="dialog-title"></p>
-    <div class="dialog-btns">
-      <button id="dialog-confirm" class="btn">CONFIRM</button>
-      <button id="dialog-cancel"  class="btn btn-secondary">CANCEL</button>
+  <!-- DISPLAY -->
+  <div id="screen-display" class="screen" role="main" aria-label="Score display">
+    <div id="disp-label" class="disp-label" aria-live="polite"></div>
+    <div id="disp-dq-text" class="disp-dq-text" aria-live="assertive">DISQUALIFIED</div>
+    <div id="disp-score" class="disp-score" aria-live="polite" aria-label="Displayed score"></div>
+    <div class="disp-actions">
+      <button id="btn-change" class="btn btn-secondary" aria-label="Change displayed score">CHANGE SCORE</button>
+      <button id="btn-fullscreen" class="btn btn-fs" aria-label="Toggle full screen">&#9974; FULL SCREEN</button>
+    </div>
+    <div class="disp-nav">
+      <button id="btn-disp-back" class="btn btn-nav" style="display:none" aria-label="Back to AKA">&#8592; BACK TO
+        AKA</button>
+      <button id="btn-disp-next-ao" class="btn btn-nav" style="display:none" aria-label="Next: score AO">NEXT: AO
+        &#8594;</button>
+      <button id="btn-disp-next-round" class="btn btn-nav" style="display:none" aria-label="Next round">NEXT ROUND
+        &#8635;</button>
+    </div>
+    <p class="disclaimer">Not officially endorsed by the World Karate Federation (WKF).</p>
+  </div>
+
+  <!-- DIALOG -->
+  <div id="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title-text">
+    <div class="dialog-box">
+      <p id="dialog-title-text" class="dialog-title"></p>
+      <div class="dialog-btns">
+        <button id="dialog-confirm" class="btn">CONFIRM</button>
+        <button id="dialog-cancel" class="btn btn-secondary">CANCEL</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ORIENTATION TOAST -->
-<div id="orient-toast" role="status" aria-live="polite" aria-atomic="true">
-  <span id="orient-toast-msg"></span>
-  <button id="orient-toast-accept"></button>
-  <button id="orient-toast-dismiss" aria-label="Dismiss">&#x2715;</button>
-</div>
+  <!-- ORIENTATION TOAST -->
+  <div id="orient-toast" role="status" aria-live="polite" aria-atomic="true">
+    <span id="orient-toast-msg"></span>
+    <button id="orient-toast-accept"></button>
+    <button id="orient-toast-dismiss" aria-label="Dismiss">&#x2715;</button>
+  </div>
 
-<!-- DISCLAIMER -->
-<p class="disclaimer">Not officially endorsed by the World Karate Federation (WKF).</p>
+  <!-- disclaimer is now inside each screen element -->
 
-<script>
-'use strict';
-const SCORE_MIN = 5.0, SCORE_MAX = 10.0, SCORE_STEP = 0.1, SCORE_DQ = 0.0;
-const COMPETITORS = { AKA: 'AKA', AO: 'AO' };
-const SCORES = [];
-for (let s = SCORE_MIN; s <= SCORE_MAX + 0.00001; s += SCORE_STEP) {
-  SCORES.push(parseFloat(s.toFixed(1)));
-}
+  <script>
+    'use strict';
+    const SCORE_MIN = 5.0, SCORE_MAX = 10.0, SCORE_STEP = 0.1, SCORE_DQ = 0.0;
+    const COMPETITORS = { AKA: 'AKA', AO: 'AO' };
+    const SCORES = [];
+    for (let s = SCORE_MIN; s <= SCORE_MAX + 0.00001; s += SCORE_STEP) {
+      SCORES.push(parseFloat(s.toFixed(1)));
+    }
 
-const state = {
-  competitor: COMPETITORS.AKA,
-  selScore: SCORE_MIN,
-  displayedScore: { AKA: null, AO: null },
-  displayedDQ:    { AKA: false, AO: false },
-};
-
-const $ = id => document.getElementById(id);
-const screens = { home: $('screen-home'), select: $('screen-select'), display: $('screen-display') };
-const els = {
-  selTitle: $('sel-title'),
-  scoreScroll: $('score-scroll'),
-  currentScoreDsp: $('current-score-display'),
-  btnMinus: $('btn-minus'), btnPlus: $('btn-plus'),
-  btnShow: $('btn-show'), btnDQ: $('btn-dq'),
-  btnSelBack: $('btn-sel-back'), btnSelNext: $('btn-sel-next'),
-  dispLabel: $('disp-label'), dispDQText: $('disp-dq-text'), dispScore: $('disp-score'),
-  btnChange: $('btn-change'), btnFullscreen: $('btn-fullscreen'),
-  btnDispBack: $('btn-disp-back'), btnDispNextAO: $('btn-disp-next-ao'), btnDispNextRound: $('btn-disp-next-round'),
-  dialogOverlay: $('dialog-overlay'), dialogTitle: $('dialog-title-text'),
-  dialogConfirm: $('dialog-confirm'), dialogCancel: $('dialog-cancel'),
-  orientToast:       $('orient-toast'),
-  orientToastMsg:    $('orient-toast-msg'),
-  orientToastAccept: $('orient-toast-accept'),
-  orientToastDismiss:$('orient-toast-dismiss'),
-};
-
-/* ---- Screen Management ---- */
-function showScreen(name) {
-  Object.values(screens).forEach(s => s.classList.remove('active'));
-  screens[name].classList.add('active');
-}
-
-/* ---- Score Scroll ---- */
-let scrollItems = [];
-let scrollTimer = null;
-
-function buildScrollList() {
-  const container = els.scoreScroll;
-  container.innerHTML = '';
-  scrollItems = [];
-  SCORES.forEach((score, idx) => {
-    const item = document.createElement('div');
-    item.className = 'score-item';
-    item.dataset.score = score;
-    item.setAttribute('role', 'option');
-    item.setAttribute('aria-selected', 'false');
-    item.textContent = score.toFixed(1);
-    item.addEventListener('click', () => selectByIndex(idx));
-    container.appendChild(item);
-    scrollItems.push(item);
-  });
-  applyScrollPadding();
-}
-
-function applyScrollPadding() {
-  const container = els.scoreScroll;
-  const itemH = scrollItems.length ? (scrollItems[0].offsetHeight || 52) : 52;
-  const half = Math.max(0, (container.offsetHeight - itemH) / 2);
-  container.style.paddingTop    = half + 'px';
-  container.style.paddingBottom = half + 'px';
-}
-
-function scoreToIndex(score) {
-  return Math.round((score - SCORE_MIN) / SCORE_STEP);
-}
-
-function selectByIndex(idx, smooth) {
-  idx = Math.max(0, Math.min(SCORES.length - 1, idx));
-  state.selScore = SCORES[idx];
-  const cls = state.competitor.toLowerCase();
-  scrollItems.forEach((item, i) => {
-    const sel = i === idx;
-    item.className = 'score-item' + (sel ? ' selected ' + cls : '');
-    item.setAttribute('aria-selected', sel ? 'true' : 'false');
-  });
-  els.currentScoreDsp.textContent = state.selScore.toFixed(1);
-  els.currentScoreDsp.className   = 'current-score-display ' + cls;
-  const itemH = scrollItems[0] ? (scrollItems[0].offsetHeight || 52) : 52;
-  els.scoreScroll.scrollTo({ top: idx * itemH, behavior: smooth ? 'smooth' : 'instant' });
-}
-
-els.scoreScroll.addEventListener('scroll', () => {
-  clearTimeout(scrollTimer);
-  scrollTimer = setTimeout(() => {
-    const itemH = scrollItems[0] ? (scrollItems[0].offsetHeight || 52) : 52;
-    const idx = Math.round(els.scoreScroll.scrollTop / itemH);
-    if (SCORES[idx] !== undefined && SCORES[idx] !== state.selScore) selectByIndex(idx, false);
-  }, 80);
-});
-
-/* ---- Open Select Screen ---- */
-function openSelect(competitor, startScore) {
-  state.competitor = competitor;
-  if (startScore === undefined) {
-    startScore = (state.displayedScore[competitor] !== null && !state.displayedDQ[competitor])
-      ? state.displayedScore[competitor] : SCORE_MIN;
-  }
-  state.selScore = startScore;
-  els.selTitle.textContent = competitor;
-  els.selTitle.className   = 'sel-title ' + competitor.toLowerCase();
-  els.btnShow.className    = 'btn btn-show btn-primary-' + competitor.toLowerCase();
-  buildScrollList();
-  requestAnimationFrame(() => {
-    applyScrollPadding();
-    selectByIndex(scoreToIndex(startScore), false);
-  });
-  if (competitor === COMPETITORS.AKA) {
-    els.btnSelBack.style.display = 'none';
-    els.btnSelNext.style.display = '';
-  } else {
-    els.btnSelBack.style.display = '';
-    els.btnSelNext.style.display = 'none';
-  }
-  showScreen('select');
-}
-
-/* ---- Open Display Screen ---- */
-function openDisplay(competitor, score, isDQ) {
-  state.competitor = competitor;
-  state.displayedScore[competitor] = isDQ ? SCORE_DQ : score;
-  state.displayedDQ[competitor]    = isDQ;
-  const colour = competitor === COMPETITORS.AKA ? 'aka' : 'ao';
-
-  // Apply subtle background tint to the display screen
-  const dispScreen = screens.display;
-  dispScreen.classList.remove('tint-aka', 'tint-ao', 'tint-dq');
-  dispScreen.classList.add(isDQ ? 'tint-dq' : 'tint-' + colour);
-
-  // Competitor label
-  els.dispLabel.textContent = competitor;
-  els.dispLabel.className   = 'disp-label ' + (isDQ ? 'dq' : colour);
-
-  // DQ banner
-  els.dispDQText.style.display = isDQ ? 'block' : 'none';
-
-  // Score — always white text (CSS handles it); DQ gets amber via .dq class
-  els.dispScore.textContent = isDQ ? '0.0' : score.toFixed(1);
-  els.dispScore.className   = 'disp-score' + (isDQ ? ' dq' : '');
-
-  // Navigation buttons
-  if (competitor === COMPETITORS.AKA) {
-    els.btnDispBack.style.display      = 'none';
-    els.btnDispNextAO.style.display    = '';
-    els.btnDispNextRound.style.display = 'none';
-  } else {
-    els.btnDispBack.style.display      = '';
-    els.btnDispNextAO.style.display    = 'none';
-    els.btnDispNextRound.style.display = '';
-  }
-  showScreen('display');
-}
-
-/* ---- Dialog ---- */
-let dialogResolve = null;
-function showDialog(message, confirmLabel, confirmClass) {
-  return new Promise(resolve => {
-    dialogResolve = resolve;
-    els.dialogTitle.textContent   = message;
-    els.dialogConfirm.textContent = confirmLabel || 'CONFIRM';
-    els.dialogConfirm.className   = 'btn ' + (confirmClass || 'btn-primary-aka');
-    els.dialogOverlay.classList.add('active');
-  });
-}
-function closeDialog(result) {
-  els.dialogOverlay.classList.remove('active');
-  if (dialogResolve) { dialogResolve(result); dialogResolve = null; }
-}
-els.dialogConfirm.addEventListener('click', () => closeDialog(true));
-els.dialogCancel.addEventListener('click',  () => closeDialog(false));
-els.dialogOverlay.addEventListener('click', e => { if (e.target === els.dialogOverlay) closeDialog(false); });
-
-/* ---- Home ---- */
-$('btn-home-aka').addEventListener('click', () => openSelect(COMPETITORS.AKA));
-$('btn-home-ao').addEventListener('click',  () => openSelect(COMPETITORS.AO));
-
-/* ---- Select Screen ---- */
-els.btnMinus.addEventListener('click', () => {
-  const idx = scoreToIndex(state.selScore);
-  if (idx > 0) selectByIndex(idx - 1, true);
-});
-els.btnPlus.addEventListener('click', () => {
-  const idx = scoreToIndex(state.selScore);
-  if (idx < SCORES.length - 1) selectByIndex(idx + 1, true);
-});
-els.btnShow.addEventListener('click', () => openDisplay(state.competitor, state.selScore, false));
-els.btnDQ.addEventListener('click', async () => {
-  const c = state.competitor;
-  const ok = await showDialog(
-    'Disqualify ' + c + '?\nThis will display 0.0.',
-    'YES, DISQUALIFY',
-    c === COMPETITORS.AKA ? 'btn-primary-aka' : 'btn-primary-ao'
-  );
-  if (ok) openDisplay(c, SCORE_DQ, true);
-});
-els.btnSelNext.addEventListener('click', () => openSelect(COMPETITORS.AO));
-els.btnSelBack.addEventListener('click', () => openSelect(COMPETITORS.AKA));
-
-/* ---- Display Screen ---- */
-els.btnChange.addEventListener('click', () => {
-  const c = state.competitor;
-  const prev = (!state.displayedDQ[c] && state.displayedScore[c] !== null)
-    ? state.displayedScore[c] : SCORE_MIN;
-  openSelect(c, prev);
-});
-els.btnDispNextAO.addEventListener('click', () => openSelect(COMPETITORS.AO));
-els.btnDispBack.addEventListener('click', () => {
-  if (state.displayedScore[COMPETITORS.AKA] !== null) {
-    openDisplay(COMPETITORS.AKA, state.displayedScore[COMPETITORS.AKA], state.displayedDQ[COMPETITORS.AKA]);
-  } else {
-    openSelect(COMPETITORS.AKA);
-  }
-});
-els.btnDispNextRound.addEventListener('click', async () => {
-  const ok = await showDialog(
-    'Start a new round?\nAll current scores will be cleared.',
-    'YES, START NEW ROUND',
-    'btn-primary-ao'
-  );
-  if (ok) {
-    state.competitor = COMPETITORS.AKA;
-    state.selScore   = SCORE_MIN;
-    state.displayedScore.AKA = null; state.displayedScore.AO = null;
-    state.displayedDQ.AKA = false;  state.displayedDQ.AO = false;
-    showScreen('home');
-  }
-});
-
-/* ---- Fullscreen ---- */
-function fsSupported() {
-  return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-}
-function inFS() {
-  return !!(document.fullscreenElement || document.webkitFullscreenElement);
-}
-function toggleFS() {
-  if (inFS()) {
-    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-  } else {
-    const el = document.documentElement;
-    (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
-  }
-}
-function updateFSBtn() {
-  if (!fsSupported()) { els.btnFullscreen.style.display = 'none'; return; }
-  els.btnFullscreen.textContent = (inFS() ? '\u26F6 EXIT FULL SCREEN' : '\u26F6 FULL SCREEN');
-}
-els.btnFullscreen.addEventListener('click', toggleFS);
-// NOTE: fullscreenchange listeners that also handle orientation lock
-// are registered in the Orientation section below to keep them together.
-updateFSBtn();
-
-/* ---- Wake Lock ---- */
-let wakeLock = null;
-async function acquireWL() {
-  if (!('wakeLock' in navigator)) return;
-  try {
-    if (wakeLock && !wakeLock.released) return;
-    wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => { wakeLock = null; });
-  } catch {}
-}
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') acquireWL();
-});
-acquireWL();
-
-/* ---- Orientation Toast ---- */
-
-// True when judge has explicitly accepted portrait layout.
-let portraitModeActive = false;
-let toastTimer = null;
-
-function isPortrait() {
-  // Prefer the Screen Orientation API; fall back to matchMedia.
-  if (window.screen && window.screen.orientation) {
-    const t = window.screen.orientation.type;
-    return t === 'portrait-primary' || t === 'portrait-secondary';
-  }
-  return window.matchMedia('(orientation: portrait)').matches;
-}
-
-function hideToast() {
-  clearTimeout(toastTimer);
-  els.orientToast.classList.remove('visible');
-}
-
-/**
- * Show the orientation toast.
- * @param {'to-portrait'|'to-landscape'|'initial-portrait'} kind
- */
-function showOrientToast(kind) {
-  clearTimeout(toastTimer);
-
-  if (kind === 'initial-portrait') {
-    // Shown on load when already in portrait — ask judge to rotate.
-    els.orientToastMsg.textContent    = 'Rotate to landscape for best view';
-    els.orientToastAccept.textContent = 'USE PORTRAIT';
-    els.orientToastAccept.onclick = () => {
-      applyPortraitMode(true);
-      hideToast();
+    const state = {
+      competitor: COMPETITORS.AKA,
+      selScore: SCORE_MIN,
+      displayedScore: { AKA: null, AO: null },
+      displayedDQ: { AKA: false, AO: false },
     };
-  } else if (kind === 'to-portrait') {
-    // Phone rotated to portrait while app was in landscape.
-    els.orientToastMsg.textContent    = 'Switch to Portrait Mode?';
-    els.orientToastAccept.textContent = 'SWITCH TO PORTRAIT';
-    els.orientToastAccept.onclick = () => {
-      applyPortraitMode(true);
-      hideToast();
+
+    const $ = id => document.getElementById(id);
+    const screens = { home: $('screen-home'), select: $('screen-select'), display: $('screen-display') };
+    const els = {
+      selTitle: $('sel-title'),
+      scoreScroll: $('score-scroll'),
+      currentScoreDsp: $('current-score-display'),
+      btnMinus: $('btn-minus'), btnPlus: $('btn-plus'),
+      btnShow: $('btn-show'), btnDQ: $('btn-dq'),
+      btnSelBack: $('btn-sel-back'), btnSelNext: $('btn-sel-next'),
+      dispLabel: $('disp-label'), dispDQText: $('disp-dq-text'), dispScore: $('disp-score'),
+      btnChange: $('btn-change'), btnFullscreen: $('btn-fullscreen'),
+      btnDispBack: $('btn-disp-back'), btnDispNextAO: $('btn-disp-next-ao'), btnDispNextRound: $('btn-disp-next-round'),
+      dialogOverlay: $('dialog-overlay'), dialogTitle: $('dialog-title-text'),
+      dialogConfirm: $('dialog-confirm'), dialogCancel: $('dialog-cancel'),
+      orientToast: $('orient-toast'),
+      orientToastMsg: $('orient-toast-msg'),
+      orientToastAccept: $('orient-toast-accept'),
+      orientToastDismiss: $('orient-toast-dismiss'),
     };
-  } else if (kind === 'to-landscape') {
-    // Phone rotated to landscape while app was in portrait.
-    els.orientToastMsg.textContent    = 'Switch to Landscape Mode?';
-    els.orientToastAccept.textContent = 'SWITCH TO LANDSCAPE';
-    els.orientToastAccept.onclick = () => {
-      applyPortraitMode(false);
-      hideToast();
-    };
-  }
 
-  els.orientToast.classList.add('visible');
+    /* ---- Screen Management ---- */
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
 
-  // Auto-dismiss after 6 seconds — judge doesn't have to act.
-  toastTimer = setTimeout(hideToast, 6000);
-}
+    /* ---- Score Scroll ---- */
+    let scrollItems = [];
+    let scrollTimer = null;
 
-els.orientToastDismiss.addEventListener('click', hideToast);
+    function buildScrollList() {
+      const container = els.scoreScroll;
+      container.innerHTML = '';
+      scrollItems = [];
+      SCORES.forEach((score, idx) => {
+        const item = document.createElement('div');
+        item.className = 'score-item';
+        item.dataset.score = score;
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', 'false');
+        item.textContent = score.toFixed(1);
+        item.addEventListener('click', () => selectByIndex(idx));
+        container.appendChild(item);
+        scrollItems.push(item);
+      });
+      applyScrollPadding();
+    }
 
-function applyPortraitMode(enable) {
-  portraitModeActive = enable;
-  document.body.classList.toggle('portrait-mode', enable);
-  // Refresh scroll padding since layout dimensions may have changed.
-  requestAnimationFrame(applyScrollPadding);
-}
+    function applyScrollPadding() {
+      const container = els.scoreScroll;
+      const itemH = scrollItems.length ? (scrollItems[0].offsetHeight || 52) : 52;
+      const half = Math.max(0, (container.offsetHeight - itemH) / 2);
+      container.style.paddingTop = half + 'px';
+      container.style.paddingBottom = half + 'px';
+    }
 
-// Try to lock orientation via Screen Orientation API (works in fullscreen).
-async function tryLockOrientation(type) {
-  if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
-    try { await window.screen.orientation.lock(type); } catch { /* not supported or not in fullscreen */ }
-  }
-}
+    function scoreToIndex(score) {
+      return Math.round((score - SCORE_MIN) / SCORE_STEP);
+    }
 
-// When entering fullscreen, lock to landscape (preferred default).
-['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => {
-  document.addEventListener(ev, () => {
-    updateFSBtn();
-    if (inFS()) {
-      // If judge is in portrait mode, lock to portrait; otherwise landscape.
-      tryLockOrientation(portraitModeActive ? 'portrait' : 'landscape');
-    } else {
-      // Exiting fullscreen — release lock if supported.
-      if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
-        try { window.screen.orientation.unlock(); } catch { }
+    function selectByIndex(idx, smooth) {
+      idx = Math.max(0, Math.min(SCORES.length - 1, idx));
+      state.selScore = SCORES[idx];
+      const cls = state.competitor.toLowerCase();
+      scrollItems.forEach((item, i) => {
+        const sel = i === idx;
+        item.className = 'score-item' + (sel ? ' selected ' + cls : '');
+        item.setAttribute('aria-selected', sel ? 'true' : 'false');
+      });
+      els.currentScoreDsp.textContent = state.selScore.toFixed(1);
+      els.currentScoreDsp.className = 'current-score-display ' + cls;
+      const itemH = scrollItems[0] ? (scrollItems[0].offsetHeight || 52) : 52;
+      els.scoreScroll.scrollTo({ top: idx * itemH, behavior: smooth ? 'smooth' : 'instant' });
+    }
+
+    els.scoreScroll.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const itemH = scrollItems[0] ? (scrollItems[0].offsetHeight || 52) : 52;
+        const idx = Math.round(els.scoreScroll.scrollTop / itemH);
+        if (SCORES[idx] !== undefined && SCORES[idx] !== state.selScore) selectByIndex(idx, false);
+      }, 80);
+    });
+
+    /* ---- Open Select Screen ---- */
+    function openSelect(competitor, startScore) {
+      state.competitor = competitor;
+      if (startScore === undefined) {
+        startScore = (state.displayedScore[competitor] !== null && !state.displayedDQ[competitor])
+          ? state.displayedScore[competitor] : SCORE_MIN;
+      }
+      state.selScore = startScore;
+      els.selTitle.textContent = competitor;
+      els.selTitle.className = 'sel-title ' + competitor.toLowerCase();
+      els.btnShow.className = 'btn btn-show btn-primary-' + competitor.toLowerCase();
+      buildScrollList();
+      requestAnimationFrame(() => {
+        applyScrollPadding();
+        selectByIndex(scoreToIndex(startScore), false);
+      });
+      if (competitor === COMPETITORS.AKA) {
+        els.btnSelBack.style.display = 'none';
+        els.btnSelNext.style.display = '';
+      } else {
+        els.btnSelBack.style.display = '';
+        els.btnSelNext.style.display = 'none';
+      }
+      showScreen('select');
+    }
+
+    /* ---- Open Display Screen ---- */
+    function openDisplay(competitor, score, isDQ) {
+      state.competitor = competitor;
+      state.displayedScore[competitor] = isDQ ? SCORE_DQ : score;
+      state.displayedDQ[competitor] = isDQ;
+      const colour = competitor === COMPETITORS.AKA ? 'aka' : 'ao';
+
+      // Apply subtle background tint to the display screen
+      const dispScreen = screens.display;
+      dispScreen.classList.remove('tint-aka', 'tint-ao', 'tint-dq');
+      dispScreen.classList.add(isDQ ? 'tint-dq' : 'tint-' + colour);
+
+      // Competitor label
+      els.dispLabel.textContent = competitor;
+      els.dispLabel.className = 'disp-label ' + (isDQ ? 'dq' : colour);
+
+      // DQ banner
+      els.dispDQText.style.display = isDQ ? 'block' : 'none';
+
+      // Score — always white text (CSS handles it); DQ gets amber via .dq class
+      els.dispScore.textContent = isDQ ? '0.0' : score.toFixed(1);
+      els.dispScore.className = 'disp-score' + (isDQ ? ' dq' : '');
+
+      // Navigation buttons
+      if (competitor === COMPETITORS.AKA) {
+        els.btnDispBack.style.display = 'none';
+        els.btnDispNextAO.style.display = '';
+        els.btnDispNextRound.style.display = 'none';
+      } else {
+        els.btnDispBack.style.display = '';
+        els.btnDispNextAO.style.display = 'none';
+        els.btnDispNextRound.style.display = '';
+      }
+      showScreen('display');
+    }
+
+    /* ---- Dialog ---- */
+    let dialogResolve = null;
+    function showDialog(message, confirmLabel, confirmClass) {
+      return new Promise(resolve => {
+        dialogResolve = resolve;
+        els.dialogTitle.textContent = message;
+        els.dialogConfirm.textContent = confirmLabel || 'CONFIRM';
+        els.dialogConfirm.className = 'btn ' + (confirmClass || 'btn-primary-aka');
+        els.dialogOverlay.classList.add('active');
+      });
+    }
+    function closeDialog(result) {
+      els.dialogOverlay.classList.remove('active');
+      if (dialogResolve) { dialogResolve(result); dialogResolve = null; }
+    }
+    els.dialogConfirm.addEventListener('click', () => closeDialog(true));
+    els.dialogCancel.addEventListener('click', () => closeDialog(false));
+    els.dialogOverlay.addEventListener('click', e => { if (e.target === els.dialogOverlay) closeDialog(false); });
+
+    /* ---- Home ---- */
+    $('btn-home-aka').addEventListener('click', () => openSelect(COMPETITORS.AKA));
+    $('btn-home-ao').addEventListener('click', () => openSelect(COMPETITORS.AO));
+
+    /* ---- Select Screen ---- */
+    els.btnMinus.addEventListener('click', () => {
+      const idx = scoreToIndex(state.selScore);
+      if (idx > 0) selectByIndex(idx - 1, true);
+    });
+    els.btnPlus.addEventListener('click', () => {
+      const idx = scoreToIndex(state.selScore);
+      if (idx < SCORES.length - 1) selectByIndex(idx + 1, true);
+    });
+    els.btnShow.addEventListener('click', () => openDisplay(state.competitor, state.selScore, false));
+    els.btnDQ.addEventListener('click', async () => {
+      const c = state.competitor;
+      const ok = await showDialog(
+        'Disqualify ' + c + '?\nThis will display 0.0.',
+        'YES, DISQUALIFY',
+        c === COMPETITORS.AKA ? 'btn-primary-aka' : 'btn-primary-ao'
+      );
+      if (ok) openDisplay(c, SCORE_DQ, true);
+    });
+    els.btnSelNext.addEventListener('click', () => openSelect(COMPETITORS.AO));
+    els.btnSelBack.addEventListener('click', () => openSelect(COMPETITORS.AKA));
+
+    /* ---- Display Screen ---- */
+    els.btnChange.addEventListener('click', () => {
+      const c = state.competitor;
+      const prev = (!state.displayedDQ[c] && state.displayedScore[c] !== null)
+        ? state.displayedScore[c] : SCORE_MIN;
+      openSelect(c, prev);
+    });
+    els.btnDispNextAO.addEventListener('click', () => openSelect(COMPETITORS.AO));
+    els.btnDispBack.addEventListener('click', () => {
+      if (state.displayedScore[COMPETITORS.AKA] !== null) {
+        openDisplay(COMPETITORS.AKA, state.displayedScore[COMPETITORS.AKA], state.displayedDQ[COMPETITORS.AKA]);
+      } else {
+        openSelect(COMPETITORS.AKA);
+      }
+    });
+    els.btnDispNextRound.addEventListener('click', async () => {
+      const ok = await showDialog(
+        'Start a new round?\nAll current scores will be cleared.',
+        'YES, START NEW ROUND',
+        'btn-primary-ao'
+      );
+      if (ok) {
+        state.competitor = COMPETITORS.AKA;
+        state.selScore = SCORE_MIN;
+        state.displayedScore.AKA = null; state.displayedScore.AO = null;
+        state.displayedDQ.AKA = false; state.displayedDQ.AO = false;
+        showScreen('home');
+      }
+    });
+
+    /* ---- Fullscreen ---- */
+    function fsSupported() {
+      return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+    }
+    function inFS() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+    function toggleFS() {
+      if (inFS()) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        const el = document.documentElement;
+        (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
       }
     }
-  });
-});
+    // All fullscreen toggle buttons across every screen.
+    const allFSBtns = [
+      $('btn-fullscreen-home'),
+      $('btn-fullscreen-select'),
+      $('btn-fullscreen'),        // display screen
+    ];
+    function updateFSBtn() {
+      const supported = fsSupported();
+      const label = inFS() ? '\u26F6 EXIT FULL SCREEN' : '\u26F6 FULL SCREEN';
+      allFSBtns.forEach(btn => {
+        if (!btn) return;
+        btn.style.display = supported ? '' : 'none';
+        btn.textContent = label;
+      });
+    }
+    allFSBtns.forEach(btn => { if (btn) btn.addEventListener('click', toggleFS); });
+    // NOTE: fullscreenchange listeners that also handle orientation lock
+    // are registered in the Orientation section below to keep them together.
+    updateFSBtn();
 
-// Handle orientation changes.
-function onOrientationChange() {
-  applyScrollPadding();
-  const nowPortrait = isPortrait();
-  if (nowPortrait && !portraitModeActive) {
-    // Phone is now portrait, but app is in landscape layout.
-    showOrientToast('to-portrait');
-  } else if (!nowPortrait && portraitModeActive) {
-    // Phone is now landscape, but app is in portrait layout.
-    showOrientToast('to-landscape');
-  } else {
-    // Orientation matches current layout — just hide any stale toast.
-    hideToast();
-  }
-}
+    /* ---- Wake Lock ---- */
+    let wakeLock = null;
+    async function acquireWL() {
+      if (!('wakeLock' in navigator)) return;
+      try {
+        if (wakeLock && !wakeLock.released) return;
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      } catch { }
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') acquireWL();
+    });
+    acquireWL();
 
-if (window.screen && window.screen.orientation) {
-  window.screen.orientation.addEventListener('change', onOrientationChange);
-} else {
-  window.addEventListener('orientationchange', onOrientationChange);
-}
-window.addEventListener('resize', applyScrollPadding);
+    /* ---- Orientation Toast ---- */
 
-// On load: if already in portrait, show the initial hint.
-if (isPortrait()) showOrientToast('initial-portrait');
+    // True when judge has explicitly accepted portrait layout.
+    let portraitModeActive = false;
+    let toastTimer = null;
 
-/* ---- Keyboard (desktop / accessibility) ---- */
-document.addEventListener('keydown', e => {
-  if (els.dialogOverlay.classList.contains('active')) {
-    if (e.key === 'Escape') closeDialog(false);
-    if (e.key === 'Enter')  closeDialog(true);
-    return;
-  }
-  if (screens.select.classList.contains('active')) {
-    if (e.key === 'ArrowUp')   { e.preventDefault(); els.btnMinus.click(); }
-    if (e.key === 'ArrowDown') { e.preventDefault(); els.btnPlus.click();  }
-    if (e.key === 'Enter')     els.btnShow.click();
-  }
-});
-</script>
+    function isPortrait() {
+      // Prefer the Screen Orientation API; fall back to matchMedia.
+      if (window.screen && window.screen.orientation) {
+        const t = window.screen.orientation.type;
+        return t === 'portrait-primary' || t === 'portrait-secondary';
+      }
+      return window.matchMedia('(orientation: portrait)').matches;
+    }
+
+    function hideToast() {
+      clearTimeout(toastTimer);
+      els.orientToast.classList.remove('visible');
+    }
+
+    /**
+     * Show the orientation toast.
+     * @param {'to-portrait'|'to-landscape'|'initial-portrait'} kind
+     */
+    function showOrientToast(kind) {
+      clearTimeout(toastTimer);
+
+      if (kind === 'initial-portrait') {
+        // Shown on load when already in portrait — ask judge to rotate.
+        els.orientToastMsg.textContent = 'Rotate to landscape for best view';
+        els.orientToastAccept.textContent = 'USE PORTRAIT';
+        els.orientToastAccept.onclick = () => {
+          applyPortraitMode(true);
+          hideToast();
+        };
+      } else if (kind === 'to-portrait') {
+        // Phone rotated to portrait while app was in landscape.
+        els.orientToastMsg.textContent = 'Switch to Portrait Mode?';
+        els.orientToastAccept.textContent = 'SWITCH TO PORTRAIT';
+        els.orientToastAccept.onclick = () => {
+          applyPortraitMode(true);
+          hideToast();
+        };
+      } else if (kind === 'to-landscape') {
+        // Phone rotated to landscape while app was in portrait.
+        els.orientToastMsg.textContent = 'Switch to Landscape Mode?';
+        els.orientToastAccept.textContent = 'SWITCH TO LANDSCAPE';
+        els.orientToastAccept.onclick = () => {
+          applyPortraitMode(false);
+          hideToast();
+        };
+      }
+
+      els.orientToast.classList.add('visible');
+
+      // Auto-dismiss after 6 seconds — judge doesn't have to act.
+      toastTimer = setTimeout(hideToast, 6000);
+    }
+
+    els.orientToastDismiss.addEventListener('click', hideToast);
+
+    function applyPortraitMode(enable) {
+      portraitModeActive = enable;
+      document.body.classList.toggle('portrait-mode', enable);
+      // Refresh scroll padding since layout dimensions may have changed.
+      requestAnimationFrame(applyScrollPadding);
+    }
+
+    // Try to lock orientation via Screen Orientation API (works in fullscreen).
+    async function tryLockOrientation(type) {
+      if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+        try { await window.screen.orientation.lock(type); } catch { /* not supported or not in fullscreen */ }
+      }
+    }
+
+    // When entering fullscreen, lock to landscape (preferred default).
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => {
+      document.addEventListener(ev, () => {
+        updateFSBtn();
+        if (inFS()) {
+          // If judge is in portrait mode, lock to portrait; otherwise landscape.
+          tryLockOrientation(portraitModeActive ? 'portrait' : 'landscape');
+        } else {
+          // Exiting fullscreen — release lock if supported.
+          if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+            try { window.screen.orientation.unlock(); } catch { }
+          }
+        }
+      });
+    });
+
+    // Handle orientation changes.
+    function onOrientationChange() {
+      applyScrollPadding();
+      const nowPortrait = isPortrait();
+      if (nowPortrait && !portraitModeActive) {
+        // Phone is now portrait, but app is in landscape layout.
+        showOrientToast('to-portrait');
+      } else if (!nowPortrait && portraitModeActive) {
+        // Phone is now landscape, but app is in portrait layout.
+        showOrientToast('to-landscape');
+      } else {
+        // Orientation matches current layout — just hide any stale toast.
+        hideToast();
+      }
+    }
+
+    if (window.screen && window.screen.orientation) {
+      window.screen.orientation.addEventListener('change', onOrientationChange);
+    } else {
+      window.addEventListener('orientationchange', onOrientationChange);
+    }
+    window.addEventListener('resize', applyScrollPadding);
+
+    // On load: if already in portrait, show the initial hint.
+    if (isPortrait()) showOrientToast('initial-portrait');
+
+    /* ---- Keyboard (desktop / accessibility) ---- */
+    document.addEventListener('keydown', e => {
+      if (els.dialogOverlay.classList.contains('active')) {
+        if (e.key === 'Escape') closeDialog(false);
+        if (e.key === 'Enter') closeDialog(true);
+        return;
+      }
+      if (screens.select.classList.contains('active')) {
+        if (e.key === 'ArrowUp') { e.preventDefault(); els.btnMinus.click(); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); els.btnPlus.click(); }
+        if (e.key === 'Enter') els.btnShow.click();
+      }
+    });
+  </script>
 </body>
+
 </html>
